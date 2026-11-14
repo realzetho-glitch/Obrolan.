@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Obrolan</title>
+<style>
+:root{--bg:#313338;--side:#2b2d31;--side2:#1e1f22;--text:#f2f3f5;--muted:#949ba4;--acc:#5865f2;--input:#383a40;--green:#23a55a;--red:#f23f43}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{display:flex;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
+button{font:inherit}
+[data-u]{cursor:pointer}
+#servers{width:72px;flex-shrink:0;background:var(--side2);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0;overflow-y:auto}
+.srv{width:48px;height:48px;border-radius:50%;background:var(--bg);color:var(--text);border:none;font-weight:700;cursor:pointer;transition:border-radius .2s}
+.srv.on,.srv:hover{border-radius:16px;background:var(--acc);color:#fff}
+#addSrv{background:transparent;color:var(--green);font-size:26px}
+#chans{width:220px;flex-shrink:0;background:var(--side);display:flex;flex-direction:column;min-width:0}
+#srvName{font-size:16px;font-weight:700;margin:0;padding:14px;border-bottom:1px solid #1f2023;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#chanList{flex:1;overflow-y:auto;padding:8px}
+.ch{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:8px;border-radius:6px;font-size:15px;cursor:pointer}
+.ch:hover,.ch.on{background:#3f4147;color:var(--text)}
+.sec{font-size:12px;color:var(--muted);text-transform:uppercase;margin:12px 8px 6px}
+.row{display:flex;align-items:center;gap:6px;padding:6px 8px;font-size:14px}
+.row span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row button{border:none;border-radius:4px;padding:4px 8px;font-size:12px;cursor:pointer;color:#fff;background:#3f4147}
+.row .ok{background:var(--green)}
+.row .no{background:var(--red)}
+.fin{flex:1;min-width:0;background:var(--input);border:none;color:var(--text);padding:8px;border-radius:6px;font-size:14px}
+#addBtn{margin:8px;padding:10px;background:#3f4147;color:var(--text);border:none;border-radius:6px;cursor:pointer}
+#myId{background:none;border:none;color:var(--muted);font-size:12px;padding:12px;text-align:left;cursor:pointer;border-top:1px solid #1f2023;word-break:break-all}
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#top{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg);box-shadow:0 1px 0 #1f2023;font-weight:600;min-width:0}
+#toggle{background:#3f4147;border:none;color:var(--text);font-size:13px;font-weight:600;padding:6px 10px;border-radius:6px;display:none;cursor:pointer}
+#topName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+#myAv{width:40px;height:40px;border-radius:50%;border:none;padding:0;cursor:pointer;background:linear-gradient(135deg,#5865f2,#eb459e);color:#fff;font-weight:700;flex-shrink:0;background-size:cover;background-position:center}
+#banner{display:none;position:fixed;top:0;left:0;right:0;z-index:30;background:var(--red);color:#fff;font-size:14px;padding:10px 14px}
+#msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.msg{display:flex;gap:12px;padding:6px 10px;margin:0 -10px;border-radius:8px}
+.msg:hover{background:#2e3035}
+.av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#5865f2,#eb459e);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.3);background-size:cover;background-position:center}
+.meta{font-size:12px;color:var(--muted)}
+.meta b{color:var(--text);font-size:15px;margin-right:6px}
+.txt{word-break:break-word;white-space:pre-wrap;margin-top:2px;font-size:15px;line-height:1.4}
+#empty{color:var(--muted);text-align:center;margin:auto;padding:0 16px}
+#bar{padding:12px;display:flex;gap:8px;border-top:1px solid #1f2023;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));align-items:stretch}
+#inp{flex:1;background:var(--input);border:none;color:var(--text);padding:12px;border-radius:8px;font-size:16px;min-width:0;outline:none}
+#inp:focus{box-shadow:0 0 0 2px var(--acc)}
+.fileBtn{position:relative;overflow:hidden;display:flex;align-items:center;background:#3f4147;color:var(--text);border-radius:10px;padding:0 12px;font-size:14px;white-space:nowrap}
+.fileBtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+#send{background:linear-gradient(135deg,#5865f2,#7983f5);color:#fff;border:none;border-radius:10px;padding:0 20px;font-size:15px;font-weight:600;cursor:pointer}
+.modal,#login{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal.show{display:flex}
+#login{background:var(--bg);z-index:40;flex-direction:column}
+#login.show{display:flex}
+#login input{width:min(300px,90%);background:var(--input);border:none;color:var(--text);padding:12px;border-radius:8px;font-size:16px;margin-bottom:8px;outline:none}
+.bigBtn{background:var(--acc);color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:15px;cursor:pointer;width:min(300px,90%);margin-top:6px}
+.card{width:min(340px,100%);background:var(--side);border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.pBanner{height:110px;background:linear-gradient(135deg,#5865f2,#eb459e) center/cover no-repeat}
+.pAv{width:84px;height:84px;border-radius:50%;border:6px solid var(--side);margin:-48px 0 0 16px;background:var(--acc) center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#fff}
+.pBody{padding:8px 16px 16px}
+.pName{font-size:20px;font-weight:700;margin-top:8px;word-break:break-word}
+.pId{font-size:11px;color:var(--muted);word-break:break-all;margin:4px 0 12px}
+.pEdit{display:none;gap:8px;margin-bottom:6px}
+.pEdit.show{display:flex}
+.pEdit input{flex:1;min-width:0;background:var(--input);border:none;color:var(--text);padding:10px;border-radius:6px;font-size:15px;outline:none}
+.pEdit button{background:var(--acc);color:#fff;border:none;border-radius:6px;padding:10px 12px;font-size:14px;cursor:pointer}
+.pBtn{position:relative;overflow:hidden;display:none;width:100%;background:#3f4147;color:var(--text);border:none;border-radius:6px;padding:10px;font-size:14px;cursor:pointer;margin-top:6px;text-align:center}
+.pBtn.always{display:block}
+.pBtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.pClose{color:var(--muted)}
+@media(max-width:700px){
+  #toggle{display:block}
+  #chans{position:fixed;top:0;bottom:0;left:72px;z-index:5;box-shadow:4px 0 12px rgba(0,0,0,.4)}
+  #chans.hide{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <p style="color:var(--muted);margin:0 0 12px">Masuk atau daftar pakai email.</p>
+  <input id="lEmail" type="email" placeholder="Email" autocomplete="email">
+  <input id="lPass" type="password" placeholder="Password (minimal 6 karakter)" autocomplete="current-password">
+  <input id="lName" placeholder="Nama tampilan (untuk daftar)" maxlength="40">
+  <button id="loginBtn" class="bigBtn">Masuk</button>
+  <button id="signupBtn" class="bigBtn" style="background:#3f4147">Daftar</button>
+</div>
+
+<div id="servers"></div>
+<div id="chans">
+  <h1 id="srvName"></h1>
+  <div id="chanList"></div>
+  <button id="addBtn">+ Tambah</button>
+  <button id="myId"></button>
+</div>
+<div id="main">
+  <div id="top"><button id="toggle">Daftar</button><span id="topName"></span><button id="myAv" title="Profil kamu"></button></div>
+  <div id="banner" onclick="this.style.display='none'"></div>
+  <div id="msgs"></div>
+  <form id="bar">
+    <label class="fileBtn">Foto<input type="file" id="imgFile" accept="image/*"></label>
+    <label class="fileBtn">Video<input type="file" id="vidFile" accept="video/*"></label>
+    <input id="inp" placeholder="Kirim pesan" autocomplete="off">
+    <button id="send" type="submit">Kirim</button>
+  </form>
+</div>
+
+<div id="modal" class="modal">
+  <div class="card">
+    <div id="pBanner" class="pBanner"></div>
+    <div class="pBody">
+      <div id="pAv" class="pAv"></div>
+      <div id="pName" class="pName"></div>
+      <div id="pId" class="pId"></div>
+      <div id="pEdit" class="pEdit"><input id="pNameInp" placeholder="Nama tampilan" maxlength="40"><button id="pNameSave">Simpan</button></div>
+      <button id="pNameBtn" class="pBtn">Ganti nama</button>
+      <label id="pAvBtn" class="pBtn">Ganti foto profil<input type="file" id="pAvFile" accept="image/*"></label>
+      <label id="pBnBtn" class="pBtn">Ganti banner<input type="file" id="pBnFile" accept="image/*"></label>
+      <button id="pLogout" class="pBtn">Keluar</button>
+      <button id="pClose" class="pBtn always pClose">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const SUPABASE_URL = "https://fevwrgbfpcjwhhmyeiwm.supabase.co";
+const SUPABASE_KEY = "sb_publishable_l593tHfqVnLeMWtIc7eMIA_AeunEo23";
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const $ = id => document.getElementById(id);
+let me = null, myEmail = '';
+let cur = { s: null, c: null };
+let pendingServer = false, subbedCh = undefined, bannerTimer = null;
+const servers = {}, channels = {}, friends = {}, profs = {};
+let msgs = [];
+
+function uid() { return crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2); }
+function esc(t) { return String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function linkify(t) { return esc(t).replace(/(https?:\/\/[^\s]+)/g, u => `<a href="${u}" target="_blank" rel="noopener" style="color:#00a8fc">${u}</a>`); }
+function banner(t) { const b = $('banner'); b.textContent = t; b.style.display = t ? 'block' : 'none'; clearTimeout(bannerTimer); if (t) bannerTimer = setTimeout(() => { b.style.display = 'none'; }, 4000); }
+function nm(id) { const p = profs[id] || {}; return p.name || p.gname ||
